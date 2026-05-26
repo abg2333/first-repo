@@ -5,16 +5,15 @@ import sys
 # 游戏常量配置
 GRID_WIDTH = 25
 GRID_HEIGHT = 20
-TILE_SIZE = 50  # 每个格子的像素大小
+TILE_SIZE = 50 
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-# 颜色配置（融入了类似 P5R 印象空间的红黑配色）
 COLOR_BG = (15, 15, 15)
-COLOR_WALL = (180, 20, 30)     # 红色墙壁
-COLOR_FLOOR = (35, 35, 40)     # 暗色地板
-COLOR_PLAYER = (255, 255, 255) # 白色主角
-COLOR_EXIT = (255, 215, 0)     # 金色出口
+COLOR_WALL = (180, 20, 30)     
+COLOR_FLOOR = (35, 35, 40)     
+COLOR_PLAYER = (255, 255, 255) 
+COLOR_EXIT = (255, 215, 0)     
 COLOR_TEXT = (200, 200, 200)
 
 class DungeonGame:
@@ -34,10 +33,9 @@ class DungeonGame:
 
     def generate_map_matrix(self):
         """核心算法：基于房间与通道的迷宫生成"""
-        # 1. 初始化全为墙壁(1)的矩阵
+
         matrix = [[1 for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
-        
-        # 2. 随机挖掘一些房间 (0为地板)
+
         num_rooms = random.randint(4, 7)
         rooms = []
         for _ in range(num_rooms):
@@ -51,26 +49,22 @@ class DungeonGame:
                     matrix[i][j] = 0
             rooms.append((x + w//2, y + h//2))
             
-        # 3. 用通道连接房间中心点
+
         for i in range(len(rooms) - 1):
             x1, y1 = rooms[i]
             x2, y2 = rooms[i+1]
-            
-            # 横向挖掘
+             
             for x in range(min(x1, x2), max(x1, x2) + 1):
                 matrix[x][y1] = 0
-            # 纵向挖掘
             for y in range(min(y1, y2), max(y1, y2) + 1):
                 matrix[x2][y] = 0
                 
-        # 确保起点和终点是地板
         matrix[self.player_pos[0]][self.player_pos[1]] = 0
         matrix[self.exit_pos[0]][self.exit_pos[1]] = 2
         
         return matrix
 
     def flood_fill_check(self, matrix):
-        """核心算法：Flood Fill 连通性验证"""
         visited = [[False for _ in range(GRID_HEIGHT)] for _ in range(GRID_WIDTH)]
         queue = [tuple(self.player_pos)]
         visited[self.player_pos[0]][self.player_pos[1]] = True
@@ -78,7 +72,7 @@ class DungeonGame:
         while queue:
             cx, cy = queue.pop(0)
             if [cx, cy] == self.exit_pos:
-                return True  # 能够到达出口，验证通过
+                return True  
                 
             # 检查四个方向
             for dx, dy in [(-1,0), (1,0), (0,-1), (0,1)]:
@@ -90,7 +84,6 @@ class DungeonGame:
         return False  # 无法到达出口
 
     def generate_valid_map(self):
-        """循环生成，直到通过 Flood Fill 验证"""
         attempts = 0
         print("\n--- Starting Procedural Generation ---")
         while True:
@@ -126,7 +119,6 @@ class DungeonGame:
                         self.player_pos = [next_x, next_y]
 
     def update(self):
-        # 检查是否到达出口
         if self.player_pos == self.exit_pos:
             print("Level Cleared! Generating next floor...")
             self.generate_valid_map()
@@ -135,11 +127,9 @@ class DungeonGame:
     def draw(self):
         self.screen.fill(COLOR_BG)
         
-        # 计算相机偏移量 (Camera Offset) - 保持玩家居中
         camera_x = SCREEN_WIDTH // 2 - (self.player_pos[0] * TILE_SIZE + TILE_SIZE // 2)
         camera_y = SCREEN_HEIGHT // 2 - (self.player_pos[1] * TILE_SIZE + TILE_SIZE // 2)
         
-        # 渲染地图矩阵
         for x in range(GRID_WIDTH):
             for y in range(GRID_HEIGHT):
                 tile = self.grid[x][y]
